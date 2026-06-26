@@ -1,0 +1,119 @@
+
+## **Prisma Setup Process Overview**
+
+### **Step 1: Update package.json with Prisma Dependencies**
+Added two key packages:
+- **`@prisma/client`** (dependencies) — Runtime client for querying the database
+- **prisma** (devDependencies) — CLI tool for schema management and migrations
+
+### **Step 2: Install Dependencies**
+Ran `npm install` to download Prisma and all packages. This also triggers Prisma's postinstall script to set up the CLI tools.
+
+### **Step 3: Create .env.local Environment File**
+Set the database URL:
+```
+DATABASE_URL=file:./prisma/dev.db
+```
+This tells Prisma where the SQLite database file should live (in the prisma folder).
+
+### **Step 4: Create Prisma Schema** (schema.prisma)
+Defined three critical sections:
+
+**Generator:**
+```prisma
+generator client {
+  provider = "prisma-client-js"
+}
+```
+Tells Prisma to generate the JavaScript client.
+
+**Datasource:**
+```prisma
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+```
+Specifies SQLite as the database and reads the connection URL from .env.local.
+
+**Model (Preorder table):**
+```prisma
+model Preorder {
+  id           String    @id @default(cuid())
+  name         String
+  productCount Int       @default(0)
+  preorderMode String?   @default("standard")
+  status       String    @default("active")
+  startDate    DateTime?
+  endDate      DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+```
+Defines the database schema with fields, types, and default values.
+
+### **Step 5: Create Prisma Client Helper** (prisma.js)
+Built a singleton pattern to safely reuse Prisma across Next.js:
+```javascript
+import { PrismaClient } from '@prisma/client';
+
+const globalForPrisma = global;
+
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log: ['error'],
+  });
+
+if (process.env.NODE_ENV !== 'production') 
+  globalForPrisma.prisma = prisma;
+```
+This prevents multiple PrismaClient instances (which causes issues in Next.js development with hot reloading).
+
+### **Step 6: Run Database Migration**
+Executed: `npx prisma migrate dev --name init`
+
+This:
+- Created migrations folder with SQL files
+- Generated the SQLite database (`prisma/dev.db`)
+- Applied the Preorder schema to the database
+
+### **Step 7: Create Seed Script** (seed.js)
+Populated test data:
+```javascript
+await prisma.preorder.createMany({
+  data: [
+    {
+      name: 'Classic T-Shirt Collection',
+      productCount: 125,
+      preorderMode: 'standard',
+      status: 'active',
+      startDate: new Date('2026-01-15'),
+      endDate: new Date('2026-03-15'),
+    },
+    // ... 4 more preorder records
+  ],
+});
+```
+
+Ran: `node prisma/seed.js` to insert 5 test records.
+
+### **Step 8: Verification Test**
+Created test-module-1.js and verified:
+- ✅ Prisma connects to SQLite
+- ✅ 5 preorder records exist in database
+- ✅ Fields are correctly stored and retrievable
+
+---
+
+## **Key Concepts Used**
+
+| Concept | Purpose |
+|---------|---------|
+| **@id @default(cuid())** | Auto-generate unique IDs |
+| **@default(now())** | Auto-set timestamp when record created |
+| **@updatedAt** | Auto-update timestamp on changes |
+| **DateTime?** | Optional date fields (nullable with `?`) |
+| **Singleton Pattern** | Reuse one PrismaClient across all routes |
+
+Now you have a working database layer ready for Module 2 (the list page). You can import prisma from prisma.js in any server component or action to query preorders.

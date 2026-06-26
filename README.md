@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Preorder Manager
 
-## Getting Started
+Next.js app with Prisma + SQLite for managing preorders.
 
-First, run the development server:
+## Requirements
+
+- Node.js 18+ (recommended)
+
+## Setup
+
+1) Install dependencies
+
+```bash
+npm install
+```
+
+2) Configure the database
+
+Create a file named **`.env.local`** in the project root:
+
+```env
+DATABASE_URL="file:./prisma/dev.db"
+```
+
+3) Create/update the database schema
+
+```bash
+npx prisma generate
+npx prisma migrate dev --name init
+```
+
+This will create/update the SQLite DB at `prisma/dev.db`.
+
+4) Seed sample data (optional but recommended)
+
+```bash
+node prisma/seed.js
+```
+
+The app uses `prisma/seed.js` to create sample `Preorder` records.
+
+## Run locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
+- http://localhost:3000
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Useful commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Open Prisma Studio (optional):
+  ```bash
+  npx prisma studio
+  ```
 
-## Learn More
+- Re-seed sample data:
+  ```bash
+  node prisma/seed.js
+  ```
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
