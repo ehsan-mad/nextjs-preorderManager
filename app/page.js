@@ -37,13 +37,12 @@ export default async function PreorderListPage({ searchParams }) {
 
   return (
     <main className="min-h-screen bg-gray-100">
-      <div className="mx-auto max-w-5xl px-4 py-8">
+      <div className="mx-auto max-w-4xl px-6 py-8">
         <PreorderListHeader />
         <PreorderTable
           preorders={serialized}
           currentSort={sort}
           currentOrder={order}
-          currentSearch=""
           currentStatus={statusFilter}
           page={page}
           total={total}
